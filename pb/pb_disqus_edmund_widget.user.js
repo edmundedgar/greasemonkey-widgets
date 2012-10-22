@@ -11,6 +11,8 @@
 // 0.1 (2011-10-02) -- Original release of Disqus version
 // 0.2 (2011-12-01) -- Updated along with Disqus change
 // 0.3 (2012-05-11) -- Fix to handle Firefox upgrade (broke setTimeout), added rewidgetize links.
+// 0.4 (2012-10-19) -- Workaround for broken "More comments" button, which is unusable on the default site.
+// 0.5 (2012-10-19) -- Automated rewidgetizing after "More comments" loads.
 //
 // --------------------------------------------------------------------
 //
@@ -114,7 +116,24 @@ posterbox.innerHTML+=addhtml;
 };
 };
 
+function edmund_widget_disqus_setup_links_when_ready(){
+	if (document.getElementById('dsq-pagination').getElementsByTagName('img').length > 0){
+		window.setTimeout(edmund_widget_disqus_setup_links_when_ready,500); 
+		return false; 
+	}
+	window.setTimeout(edmund_widget_disqus_setup_links, 500);
+}
+
 function edmund_widget_refresh_document(){
+// Temporary workaround for Disqus breakage in more comments button.
+//DISQUS.dtpl.actions.fire('thread.paginate', 2, this); return false
+if (document.getElementsByClassName('dsq-more-button').length > 0) {
+var orig = document.getElementsByClassName('dsq-more-button')[0].getAttribute('onClick');
+if (orig && (orig.indexOf("this)") != -1)) {
+	var newstr = orig.replace("this)", "this, 250); edmund_widget_disqus_setup_links_when_ready();");
+	document.getElementsByClassName('dsq-more-button')[0].setAttribute('onClick', newstr);
+}
+}
 lis=document.getElementsByClassName('dsq-comment');
 for(i=0;i<lis.length;i++){
 lnode=lis[i];
@@ -228,6 +247,7 @@ edmund_widget_disqus_embed_function(edmund_widget_disqus_setup_links);
 edmund_widget_disqus_embed_function(edmund_widget_disqus_set_styles);
 edmund_widget_disqus_embed_function(edmund_widget_disqus_linkify_child_node);
 edmund_widget_disqus_embed_function(edmund_widget_refresh_document);
+edmund_widget_disqus_embed_function(edmund_widget_disqus_setup_links_when_ready);
 edmund_widget_disqus_embed_function(edmund_widget_disqus_cookie_contains_poster);
 edmund_widget_disqus_embed_function(edmund_widget_disqus_add_poster_to_list);
 

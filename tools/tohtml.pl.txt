@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+# This script will squidge a javascript
+# into a bookmarklet
+
+$file = $ARGV[0];
+$send = $ARGV[1];
+open(FILE, $file) or die "cannot open file $file: $!";
+@lines = <FILE>;
+close FILE;
+
+unshift(@lines, 'javascript:');
+pop @lines;
+push @lines, 'setuplinks();';
+
+$js = '';
+
+foreach $l(@lines) {
+$l =~s/\n//g;
+$l =~s/\"/\&quot;/g;
+$js .= $l;
+}
+
+$html = '<html><body>';
+$html .= '<a href="'.$js.'">PB Enhanced</a>';
+$html .= '</body></html>';
+
+open('OUT', ">pb.html");
+print OUT $html;
+close OUT;
+
+if ($send) {
+$cmd='scp pb.html ed@oak.edochan.com:/var/www/edochan/webroot/pb.html';
+`$cmd`
+}

@@ -1,5 +1,5 @@
 // Disqus PB Favourite / Ignore feature
-// version 0.3
+// version 0.5
 // 2012-05-11
 // Released under the GPL license: http://www.gnu.org/copyleft/gpl.html
 // By Edmund Edgar using techniques from Meglamaniacs4U's version.

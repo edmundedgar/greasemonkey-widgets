@@ -1,6 +1,6 @@
 // Disqus PB Favourite / Ignore feature
-// version 0.2
-// 2011-12-01
+// version 0.3
+// 2012-05-11
 // Released under the GPL license: http://www.gnu.org/copyleft/gpl.html
 // By Edmund Edgar using techniques from Meglamaniacs4U's version.
 // This is designed for politicalbetting.com, but would probably work...
@@ -10,6 +10,7 @@
 // Changelog:
 // 0.1 (2011-10-02) -- Original release of Disqus version
 // 0.2 (2011-12-01) -- Updated along with Disqus change
+// 0.3 (2012-05-11) -- Fix to handle Firefox upgrade (broke setTimeout), added rewidgetize links.
 //
 // --------------------------------------------------------------------
 //
@@ -36,18 +37,41 @@
 
 
 function edmund_widget_disqus_setup_links(){
-if((!document.getElementById('dsq-comments')||(document.getElementsByClassName('dsq-comment').length==0))){ 
-window.setTimeout('edmund_widget_disqus_setup_links()',500); 
-return false; };
-if(window.edmund_widget_setup_links_done){ return false; };
-window.edmund_widget_setup_links_done=true;
-if(!document.getElementById('edmund_widget_next_favourite_top_link')){ document.getElementById('dsq-global-toolbar').innerHTML+='<a id="edmund_widget_next_favourite_top_link" name="edmund_widget_next_favourite_top_link" href="#edmund_widget_next_favourite_top_link" onClick="return edmund_widget_disqus_next_favourite(null,this);">Favourite</a> '; }
-if(!document.getElementById('moreComments')){ document.getElementById('dsq-global-toolbar').innerHTML+='<a id="moreComments" href="#" onClick="return edmund_widget_disqus_more_comments()">Reload</a>';};
-if(!document.getElementById('moreCommentsLower')){ moreCommentsDiv=document.createElement('div'); moreCommentsDiv.innerHTML='<a id="moreCommentsLower" href="#" onClick="return edmund_widget_disqus_more_comments()">More Comments</a>'; document.getElementById('dsq-pagination').parentNode.insertBefore(moreCommentsDiv,document.getElementById('dsq-pagination')); };
-edmund_widget_disqus_set_styles();
-lis=document.getElementsByClassName('dsq-comment');
-for(i=0;i<lis.length;i++){ edmund_widget_disqus_linkify_child_node(lis[i]); };
-edmund_widget_refresh_document();
+
+	if((!document.getElementById('dsq-comments')||(document.getElementsByClassName('dsq-comment').length==0))){ 
+		window.setTimeout(edmund_widget_disqus_setup_links,500); 
+		return false; 
+	}
+
+	if(!document.getElementById('edmund_widget_reload_upper')){ 
+		document.getElementById('dsq-global-toolbar').innerHTML+='<a id="edmund_widget_reload_upper" href="#" onClick="return edmund_widget_disqus_more_comments()">Reload</a> &nbsp; &nbsp; &nbsp ';
+	};
+
+	if(!document.getElementById('edmund_widget_rewidgetize_upper')){ 
+		document.getElementById('dsq-global-toolbar').innerHTML+='<a id="edmund_widget_rewidgetize_upper" href="#" onClick="return edmund_widget_disqus_setup_links()">Rewidgetize</a> &nbsp; &nbsp &nbsp; ';
+	};
+
+	if(!document.getElementById('edmund_widget_next_favourite_top_link')){ 
+		document.getElementById('dsq-global-toolbar').innerHTML+='<a id="edmund_widget_next_favourite_top_link" name="edmund_widget_next_favourite_top_link" href="#edmund_widget_next_favourite_top_link" onClick="return edmund_widget_disqus_next_favourite(null,this);">First Favourite</a> '; 
+	}
+
+	if(!document.getElementById('edmund_widget_reload_lower')){ 
+		var edmund_widget_lower_navigation_div=document.createElement('div'); 
+		edmund_widget_lower_navigation_div.innerHTML='<a id="edmund_widget_reload_lower" href="#" onClick="return edmund_widget_disqus_more_comments()">Reload</a>  &nbsp; &nbsp; &nbsp '+'<a id="edmund_widget_rewidgetize_lower" href="#" onClick="return edmund_widget_disqus_setup_links()">Rewidgetize</a>';
+		document.getElementById('dsq-pagination').parentNode.insertBefore(edmund_widget_lower_navigation_div,document.getElementById('dsq-pagination')); 
+	};
+
+	edmund_widget_disqus_set_styles();
+
+	lis=document.getElementsByClassName('dsq-comment');
+	for(i=0;i<lis.length;i++){ 
+		edmund_widget_disqus_linkify_child_node(lis[i]); 
+	};
+
+	edmund_widget_refresh_document();
+
+	return false;
+	
 };
 
 function edmund_widget_disqus_set_styles(){
@@ -197,16 +221,25 @@ function edmund_widget_disqus_embed_function(s)
 	document.body.appendChild(script);
 }
 
+
 edmund_widget_disqus_embed_function(edmund_widget_disqus_setup_links);
+
+
 edmund_widget_disqus_embed_function(edmund_widget_disqus_set_styles);
 edmund_widget_disqus_embed_function(edmund_widget_disqus_linkify_child_node);
 edmund_widget_disqus_embed_function(edmund_widget_refresh_document);
 edmund_widget_disqus_embed_function(edmund_widget_disqus_cookie_contains_poster);
 edmund_widget_disqus_embed_function(edmund_widget_disqus_add_poster_to_list);
+
+
 edmund_widget_disqus_embed_function(edmund_widget_remove_poster_from_list);
 edmund_widget_disqus_embed_function(edmund_widget_disqus_more_comments);
 edmund_widget_disqus_embed_function(edmund_widget_discus_cookie_contents);
+
+
+
 edmund_widget_disqus_embed_function(edmund_widget_disqus_next_favourite);
 
 edmund_widget_disqus_setup_links();
+
 

@@ -1,6 +1,6 @@
 // Disqus PB Favourite / Ignore feature
-// version 0.1
-// 2011-10-15
+// version 0.2
+// 2011-12-01
 // Released under the GPL license: http://www.gnu.org/copyleft/gpl.html
 // By Edmund Edgar using techniques from Meglamaniacs4U's version.
 // This is designed for politicalbetting.com, but would probably work...
@@ -9,6 +9,7 @@
 //
 // Changelog:
 // 0.1 (2011-10-02) -- Original release of Disqus version
+// 0.2 (2011-12-01) -- Updated along with Disqus change
 //
 // --------------------------------------------------------------------
 //
@@ -40,8 +41,8 @@ window.setTimeout('edmund_widget_disqus_setup_links()',500);
 return false; };
 if(window.edmund_widget_setup_links_done){ return false; };
 window.edmund_widget_setup_links_done=true;
-if(!document.getElementById('edmund_widget_next_favourite_top_link')){ document.getElementsByClassName('dsq-options')[0].innerHTML+='<a id="edmund_widget_next_favourite_top_link" name="edmund_widget_next_favourite_top_link" href="#edmund_widget_next_favourite_top_link" onClick="return edmund_widget_disqus_next_favourite(null,this);">Favourite</a> '; }
-if(!document.getElementById('moreComments')){ document.getElementsByClassName('dsq-options')[0].innerHTML+='<a id="moreComments" href="#" onClick="return edmund_widget_disqus_more_comments()">Reload</a>';};
+if(!document.getElementById('edmund_widget_next_favourite_top_link')){ document.getElementById('dsq-global-toolbar').innerHTML+='<a id="edmund_widget_next_favourite_top_link" name="edmund_widget_next_favourite_top_link" href="#edmund_widget_next_favourite_top_link" onClick="return edmund_widget_disqus_next_favourite(null,this);">Favourite</a> '; }
+if(!document.getElementById('moreComments')){ document.getElementById('dsq-global-toolbar').innerHTML+='<a id="moreComments" href="#" onClick="return edmund_widget_disqus_more_comments()">Reload</a>';};
 if(!document.getElementById('moreCommentsLower')){ moreCommentsDiv=document.createElement('div'); moreCommentsDiv.innerHTML='<a id="moreCommentsLower" href="#" onClick="return edmund_widget_disqus_more_comments()">More Comments</a>'; document.getElementById('dsq-pagination').parentNode.insertBefore(moreCommentsDiv,document.getElementById('dsq-pagination')); };
 edmund_widget_disqus_set_styles();
 lis=document.getElementsByClassName('dsq-comment');
@@ -54,11 +55,12 @@ if(document.getElementById('edmund-widget-disqus-stylesheet')) { return true; };
 var sheet = document.createElement('style');
 sheet.setAttribute('id','edmund-widget-disqus-stylesheet');
 sheet.innerHTML = ""+
+"li.dsq-comment div.dsq-comment-text{font-size:100% !important ;}"+
 "li.dsq-comment.edmund-widget-ignore a.ignore_link {display:none !important ;}"+
 "li.dsq-comment.edmund-widget-favourite a.favourite_link{display:none !important ;}"+
 "li.dsq-comment:not(.edmund-widget-ignore) a.unignore_link {display:none !important ;}"+
 "li.dsq-comment:not(.edmund-widget-favourite) a.unfavourite_link {display:none !important ;}"+
-"li.dsq-comment:not(.edmund-widget-favourite) a.next_favourite_link {display:none !important ;text-align:right !important}"+
+"li.dsq-comment:not(.edmund-widget-favourite) a.next_favourite_link {display:none !important ;}"+
 "li.dsq-comment.edmund-widget-ignore div.dsq-comment-message {display:none !important ;}"+
 "li.dsq-comment.edmund-widget-ignore div.dsq-comment-footer {display:none !important ;}"+
 "li.dsq-comment.edmund-widget-favourite {margin:4px; background-color:#ffffcc !important ;}"+
@@ -73,19 +75,15 @@ bits=node.id.split('-');
 if((bits.length==3)&&(bits[0]=='dsq')&&(bits[1]=='comment')){
 cid=bits[2];
 l=node.id;
-posternode=document.getElementById('dsq-author-user-'+cid);
-lnk=posternode.childNodes[0].innerHTML;
-poster=lnk?lnk:posternode.innerHTML;
-posterbox=posternode.parentNode.parentNode;
+poster=node.getElementsByClassName('dsq-commenter-name')[0].innerHTML;
+posterbox=node.getElementsByClassName('dsq-comment-header')[0];
 node.setAttribute('data-edmund-widget-author',poster);
 addhtml='<div class="edmund-widget-controls" id="edmund-widget-comment-'+cid+'">';
 addhtml+=' <a href="#'+l+'" class="unignore_link" onClick="return edmund_widget_remove_poster_from_list(this,\'pbign\');"> Unignore</a>';
 addhtml+=' <a href="#'+l+'" class="ignore_link" onClick="return edmund_widget_disqus_add_poster_to_list(this,\'pbign\');"> Ignore</a>';
 addhtml+=' <a href="#'+l+'" class="unfavourite_link" onClick="return edmund_widget_remove_poster_from_list(this,\'pbfav\');"> Unfavourite</a>';
 addhtml+=' <a href="#'+l+'" class="favourite_link" onClick="return edmund_widget_disqus_add_poster_to_list(this,\'pbfav\');"> Favourite</a>';
-addhtml+='<div style="float:right; margin-right:20px;" class="edmund-widget-next-favourite-controls">';
 addhtml+=' <a href="#'+l+'" class="next_favourite_link" onClick="return edmund_widget_disqus_next_favourite(this,this);"> Next Favourite</a>';
-addhtml+='</div>';
 addhtml+='</div>';
 posterbox.innerHTML+=addhtml;
 };
@@ -133,7 +131,7 @@ return (ck.indexOf('|'+escape(poster)+'|')>=0);
 };
 
 function edmund_widget_disqus_add_poster_to_list(node,ckn){
-poster=node.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.getAttribute('data-edmund-widget-author');
+poster=node.parentNode.parentNode.parentNode.parentNode.getAttribute('data-edmund-widget-author');
 if(edmund_widget_disqus_cookie_contains_poster(poster,ckn)) {return true;};
 ck=edmund_widget_discus_cookie_contents(ckn);
 document.cookie=ckn+'='+ck+'|'+escape(poster)+'|; expires=Thu, 22 Feb 2020 00:00:00 UTC; path=/; domain=politicalbetting.com';
@@ -142,7 +140,7 @@ return true;
 };
 
 function edmund_widget_remove_poster_from_list(node,ckn){
-poster=node.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.getAttribute('data-edmund-widget-author');
+poster=node.parentNode.parentNode.parentNode.parentNode.getAttribute('data-edmund-widget-author');
 ck=edmund_widget_discus_cookie_contents(ckn);
 ck=ck.replace('|'+escape(poster)+'|','');
 document.cookie=ckn+'='+ck+'; expires=Thu, 22 Feb 2020 00:00:00 UTC; path=/; domain=politicalbetting.com';
@@ -179,7 +177,7 @@ li=document.getElementsByClassName('dsq-comment')[0];
 return false;
 };
 }else{
-li=startnode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+li=startnode.parentNode.parentNode.parentNode.parentNode;
 };
 while(li=li.nextSibling){
 if(li && li.tagName=='LI' && li.getAttribute && li.getAttribute('data-edmund-widget-favourite')=='true' ) {

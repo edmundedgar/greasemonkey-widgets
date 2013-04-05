@@ -1,5 +1,5 @@
 // Vanilla PB Favourite / Ignore feature
-// version 0.3
+// version 0.7
 // 2013-03-21
 // Released under the GPL license: http://www.gnu.org/copyleft/gpl.html
 // By Edmund Edgar using techniques from Meglamaniacs4U's version.
@@ -39,39 +39,26 @@
 
 
 function edmund_widget_vanilla_setup_links(){
-
-	if((!document.getElementById('vanilla_discussion_embed')||(document.getElementsByClassName('ItemComment').length==0))){ 
+	if (document.getElementsByClassName('ItemComment').length==0) {
 		window.setTimeout(edmund_widget_vanilla_setup_links,5000); 
 		return false; 
 	}
-
-	if(!document.getElementById('edmund_widget_reload_upper')){
-console.log("adding upper"); 
-		document.getElementById('Form_Comment').innerHTML+='<a id="edmund_widget_reload_upper" href="#" onClick="return edmund_widget_vanilla_more_comments()">Reload</a> &nbsp; &nbsp; &nbsp ';
-	};
-
-	if(!document.getElementById('edmund_widget_rewidgetize_upper')){ 
-		document.getElementById('Form_Comment').innerHTML+='<a id="edmund_widget_rewidgetize_upper" href="#" onClick="return edmund_widget_vanilla_setup_links()">Rewidgetize</a> &nbsp; &nbsp &nbsp; ';
-	};
-
+	if (document.getElementsByClassName('Loading').length > 0) {
+		window.setTimeout(edmund_widget_vanilla_setup_links,5000); 
+		return false; 
+	}
 	if(!document.getElementById('edmund_widget_next_favourite_top_link')){ 
 		document.getElementById('Form_Comment').innerHTML+='<a id="edmund_widget_next_favourite_top_link" name="edmund_widget_next_favourite_top_link" href="#edmund_widget_next_favourite_top_link" onClick="return edmund_widget_vanilla_next_favourite(null,this);">First Favourite</a> '; 
 	}
 
-	if(!document.getElementById('PagerMore')){ 
-		document.getElementById('PagerMore').onclick='edmund_widget_vanilla_setup_links();';
-//		var edmund_widget_lower_navigation_div=document.createElement('div'); 
-//		edmund_widget_lower_navigation_div.innerHTML='<a id="edmund_widget_reload_lower" href="#" onClick="return edmund_widget_vanilla_more_comments()">Reload</a>  &nbsp; &nbsp; &nbsp '+'<a id="edmund_widget_rewidgetize_lower" href="#" onClick="return edmund_widget_vanilla_setup_links()">Rewidgetize</a>';
-		//document.getElementById('dsq-pagination').parentNode.insertBefore(edmund_widget_lower_navigation_div,document.getElementById('dsq-pagination')); 
+	if(document.getElementById('PagerMore')){ 
+		document.getElementById('PagerMore').onclick='edmund_widget_vanilla_setup_links_when_ready();';
 	};
-
 	edmund_widget_vanilla_set_styles();
-
 	lis=document.getElementsByClassName('ItemComment');
 	for(i=0;i<lis.length;i++){ 
 		edmund_widget_vanilla_linkify_child_node(lis[i]); 
 	};
-
 	edmund_widget_refresh_document();
 
 	return false;
@@ -107,12 +94,12 @@ l=node.id;
 poster=node.getElementsByClassName('Username')[0].innerHTML;
 posterbox=node.getElementsByClassName('AuthorInfo')[0];
 node.setAttribute('data-edmund-widget-author',poster);
-addhtml='<div class="edmund-widget-controls" id="edmund-widget-comment-'+cid+'">';
-addhtml+=' <a href="#'+l+'" class="unignore_link" onClick="return edmund_widget_remove_poster_from_list(this,\'pbign\',event);"> Unignore</a>';
-addhtml+=' <a href="#'+l+'" class="ignore_link" onClick="return edmund_widget_vanilla_add_poster_to_list(this,\'pbign\',event);"> Ignore</a>';
-addhtml+=' <a href="#'+l+'" class="unfavourite_link" onClick="return edmund_widget_remove_poster_from_list(this,\'pbfav\',event);"> Unfavourite</a>';
-addhtml+=' <a href="#'+l+'" class="favourite_link" onClick="return edmund_widget_vanilla_add_poster_to_list(this,\'pbfav\',event);"> Favourite</a>';
-addhtml+=' <a href="#'+l+'" class="next_favourite_link" onClick="return edmund_widget_vanilla_next_favourite(this,this,event);"> Next Favourite</a>';
+addhtml='<div class="edmund-widget-controls NoTop" id="edmund-widget-comment-'+cid+'">';
+addhtml+=' <a href="#'+l+'" class="unignore_link NoTop" onClick="return edmund_widget_remove_poster_from_list(this,\'pbign\');"> Unignore</a>';
+addhtml+=' <a href="#'+l+'" class="ignore_link NoTop" onClick="return edmund_widget_vanilla_add_poster_to_list(this,\'pbign\');"> Ignore</a>';
+addhtml+=' <a href="#'+l+'" class="unfavourite_link NoTop" onClick="return edmund_widget_remove_poster_from_list(this,\'pbfav\');"> Unfavourite</a>';
+addhtml+=' <a href="#'+l+'" class="favourite_link NoTop" onClick="return edmund_widget_vanilla_add_poster_to_list(this,\'pbfav\');"> Favourite</a>';
+addhtml+=' <a href="#'+l+'" class="next_favourite_link" onClick="return edmund_widget_vanilla_next_favourite(this,this);"> Next Favourite</a>';
 addhtml+='</div>';
 posterbox.innerHTML+=addhtml;
 };
@@ -129,17 +116,11 @@ console.log('setup when ready');
 }
 
 function edmund_widget_refresh_document(){
-// Temporary workaround for Disqus breakage in more comments button.
-//DISQUS.dtpl.actions.fire('thread.paginate', 2, this); return false
-document.getElementById('PagerMore').getElementsByTagName('a')[0].setAttribute('onClick', "setTimeout('edmund_widget_vanilla_setup_links_when_ready', 5000);");
 
-if (document.getElementsByClassName('dsq-more-button').length > 0) {
-var orig = document.getElementsByClassName('dsq-more-button')[0].getAttribute('onClick');
-if (orig && (orig.indexOf("this)") != -1)) {
-	var newstr = orig.replace("this)", "this, 250); edmund_widget_vanilla_setup_links_when_ready();");
-	document.getElementsByClassName('dsq-more-button')[0].setAttribute('onClick', newstr);
+if (document.getElementById('PagerMore') && document.getElementById('PagerMore').getElementsByTagName('a')[0]) {
+document.getElementById('PagerMore').getElementsByTagName('a')[0].setAttribute('onClick', "setTimeout(function(){edmund_widget_vanilla_setup_links_when_ready();}, 500);");
 }
-}
+
 lis=document.getElementsByClassName('ItemComment');
 for(i=0;i<lis.length;i++){
 lnode=lis[i];
@@ -167,12 +148,13 @@ lnode.setAttribute('data-edmund-widget-ignore','');
 lnode.setAttribute('class',newclasses.join(' '));
 };
 };
-return false;
+return true;
 };
 
 
 function edmund_widget_vanilla_cookie_contains_poster(poster,ckn){
 if(document.cookie.length<1){
+console.log("no cookie found for "+ckn);
 return false;
 };
 ck=edmund_widget_discus_cookie_contents(ckn);
@@ -185,7 +167,6 @@ if(edmund_widget_vanilla_cookie_contains_poster(poster,ckn)) {return false;};
 ck=edmund_widget_discus_cookie_contents(ckn);
 document.cookie=ckn+'='+ck+'|'+escape(poster)+'|; expires=Thu, 22 Feb 2020 00:00:00 UTC; path=/; domain=politicalbetting.vanillaforums.com';
 edmund_widget_refresh_document();
-e.preventPropagation();
 return true;
 };
 
@@ -195,7 +176,6 @@ ck=edmund_widget_discus_cookie_contents(ckn);
 ck=ck.replace('|'+escape(poster)+'|','');
 document.cookie=ckn+'='+ck+'; expires=Thu, 22 Feb 2020 00:00:00 UTC; path=/; domain=politicalbetting.vanillaforums.com';
 edmund_widget_refresh_document();
-e.preventPropagation();
 return true;
 };
 
@@ -220,28 +200,24 @@ ck=document.cookie.substring(c_start,c_end);
 return ck;
 };
 
-function edmund_widget_vanilla_next_favourite(startnode,node,e){
+function edmund_widget_vanilla_next_favourite(startnode,node){
+$('#'+node.id).die(); // remove vanilla event handlers
 if(!startnode){
 if(document.getElementsByClassName('ItemComment').length>0){
 li=document.getElementsByClassName('ItemComment')[0];
 }else{
-e.stopPropagation();
-return false;
+return true;
 };
 }else{
 li=startnode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
 };
 while(li=li.nextSibling){
 if(li && li.tagName=='LI' && li.getAttribute && li.getAttribute('data-edmund-widget-favourite')=='true' ) {
-console.log(li.id);
 node.href='#'+li.id;
-e.stopPropagation();
-console.log('return');
 return true;
 };
 };
 node.href='#'+li.id;
-e.stopPropagation();
 return true;
 };
 

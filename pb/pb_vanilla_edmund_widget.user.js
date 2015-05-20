@@ -14,6 +14,7 @@
 // 0.5 (2012-10-19) -- Automated rewidgetizing after "More comments" loads.
 // 0.6 (2013-03-15) -- Updated along with Disqus change
 // 0.7 (2013-03-21) -- Adapted to Vanilla Forums
+// 0.8 (2015-05-20) -- Add hiding of nested blockquotes
 //
 // --------------------------------------------------------------------
 //
@@ -35,7 +36,6 @@
 // @description     Adds Favourite and Ignore features to politicalbetting.com.
 // @include         http://politicalbetting.vanillaforums.com/*
 // ==/UserScript==
-
 
 
 function edmund_widget_vanilla_setup_links(){
@@ -79,7 +79,9 @@ sheet.innerHTML = ""+
 "li.ItemComment.edmund-widget-ignore div.Item-BodyWrap {display:none !important ;}"+
 "li.ItemComment.edmund-widget-ignore div.CommentInfo {display:none !important ;}"+
 "li.ItemComment.edmund-widget-ignore div.PhotoWrap {display:none !important ;}"+
-"li.ItemComment.edmund-widget-favourite {background-color:#ffffcc !important ;}";
+"li.ItemComment.edmund-widget-favourite {background-color:#ffffcc !important ;}"+
+"li.ItemComment blockquote.UserQuote blockquote.UserQuote div {display:none !important}" +
+"li.ItemComment blockquote.UserQuote blockquote.UserQuote:hover div {display:block !important ;}" +	
 document.body.appendChild(sheet);
 };
 
@@ -221,7 +223,6 @@ node.href='#'+li.id;
 return true;
 };
 
-
 function edmund_widget_vanilla_embed_function(s) 
 {
 	var script=document.createElement('script');
@@ -250,5 +251,4 @@ edmund_widget_vanilla_embed_function(edmund_widget_discus_cookie_contents);
 edmund_widget_vanilla_embed_function(edmund_widget_vanilla_next_favourite);
 
 edmund_widget_vanilla_setup_links();
-
 
